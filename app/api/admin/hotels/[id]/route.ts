@@ -1,70 +1,80 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
-import * as jwt from 'jsonwebtoken'
 
 const prisma = new PrismaClient()
 
-async function verifyToken(request: NextRequest) {
-  const token = request.headers.get('Authorization')?.split(' ')[1]
-  if (!token) {
-    return null
-  }
+export async function GET(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
+  const { id } = context.params
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as jwt.JwtPayload
-    return decoded
+    const hotel = await prisma.hotel.findUnique({
+      where: { id },
+    })
+
+    if (!hotel) {
+      return NextResponse.json({ error: 'Hotel not found' }, { status: 404 })
+    }
+
+    return NextResponse.json(hotel)
   } catch (error) {
-    return null
+    console.error('Error fetching hotel:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-  const user = await verifyToken(request)
-  if (!user || user.role !== 'ADMIN') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function PUT(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
+  const { id } = context.params
+
+  try {
+    const body = await request.json()
+    const { name, description, price, address, image } = body
+
+    const hotel = await prisma.hotel.update({
+      where: { id },
+      data: {
+        name,
+        description,
+        price,
+        address,
+        image,
+      },
+    })
+
+    return NextResponse.json(hotel)
+  } catch (error) {
+    console.error('Error updating hotel:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
-
-  const hotel = await prisma.hotel.findUnique({
-    where: { id: params.id },
-  })
-
-  if (!hotel) {
-    return NextResponse.json({ error: 'Hotel not found' }, { status: 404 })
-  }
-
-  return NextResponse.json(hotel)
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  const user = await verifyToken(request)
-  if (!user || user.role !== 'ADMIN') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function DELETE(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
+  const { id } = context.params;
+
+  try {
+    const hotel = await prisma.hotel.findUnique({
+      where: { id },
+    });
+
+    if (!hotel) {
+      return NextResponse.json({ error: 'Hotel not found' }, { status: 404 });
+    }
+
+    await prisma.hotel.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ message: 'Hotel deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting hotel:', error);
+    return NextResponse.json({ error: 'Failed to delete hotel' }, { status: 500 });
   }
-
-  const body = await request.json()
-  const { name, description, price } = body
-
-  const hotel = await prisma.hotel.update({
-    where: { id: params.id },
-    data: {
-      name,
-      description,
-      price,
-    },
-  })
-
-  return NextResponse.json(hotel)
-}
-
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-  const user = await verifyToken(request)
-  if (!user || user.role !== 'ADMIN') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  await prisma.hotel.delete({
-    where: { id: params.id },
-  })
-
-  return NextResponse.json({ message: 'Hotel deleted successfully' })
 }

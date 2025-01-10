@@ -35,13 +35,15 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { name, description, price } = body
+  const { name, description, price, address, image } = body
 
   const hotel = await prisma.hotel.create({
     data: {
       name,
       description,
       price,
+      address,
+      image,
     },
   })
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,40 +9,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function NewHotel() {
   const [name, setName] = useState('')
-  const [address, setAddress] = useState('')
   const [description, setDescription] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
+  const [price, setPrice] = useState('')
+  const [address, setAddress] = useState('')
+  const [image, setImage] = useState('')
   const router = useRouter()
-
-  useEffect(() => {
-    const verifyToken = async () => {
-      const token = localStorage.getItem('token')
-      if (!token) {
-        router.push('/login')
-        return
-      }
-
-      try {
-        const response = await fetch('/api/auth/verify', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        })
-        const data = await response.json()
-
-        if (!data.isAuthenticated || !data.isAdmin) {
-          router.push('/login')
-        } else {
-          setIsLoading(false)
-        }
-      } catch (error) {
-        console.error('Verification error:', error)
-        router.push('/login')
-      }
-    }
-
-    verifyToken()
-  }, [router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -53,26 +24,21 @@ export default function NewHotel() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify({ name, address, description }),
+      body: JSON.stringify({ name, description, price: parseFloat(price), address, image }),
     })
 
     if (response.ok) {
-      router.push('/admin/hotels')
+      router.push('/admin/dashboard')
     } else {
       alert('Failed to create hotel')
     }
   }
 
-  if (isLoading) {
-    return <div>Loading...</div>
-  }
-
   return (
-    <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Add New Hotel</h1>
+    <div className="container mx-auto py-10">
       <Card>
         <CardHeader>
-          <CardTitle>Hotel Details</CardTitle>
+          <CardTitle>Add New Hotel</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -86,6 +52,27 @@ export default function NewHotel() {
               />
             </div>
             <div>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="price" className="block text-sm font-medium text-gray-700">Price per night</label>
+              <Input
+                id="price"
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                required
+                min="0"
+                step="0.01"
+              />
+            </div>
+            <div>
               <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address</label>
               <Input
                 id="address"
@@ -95,12 +82,12 @@ export default function NewHotel() {
               />
             </div>
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                required
+              <label htmlFor="image" className="block text-sm font-medium text-gray-700">Image URL</label>
+              <Input
+                id="image"
+                value={image}
+                onChange={(e) => setImage(e.target.value)}
+                placeholder="https://example.com/image.jpg"
               />
             </div>
             <Button type="submit">Create Hotel</Button>

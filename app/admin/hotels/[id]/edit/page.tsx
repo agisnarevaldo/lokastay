@@ -13,6 +13,8 @@ export default function EditHotel({ params }: { params: Promise<{ id: string }> 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
+  const [address, setAddress] = useState('')
+  const [image, setImage] = useState('')
   const router = useRouter()
 
   useEffect(() => {
@@ -28,6 +30,8 @@ export default function EditHotel({ params }: { params: Promise<{ id: string }> 
         setName(hotel.name)
         setDescription(hotel.description)
         setPrice(hotel.price.toString())
+        setAddress(hotel.address)
+        setImage(hotel.image || '')
       } else {
         alert('Failed to fetch hotel details')
         router.push('/admin/dashboard')
@@ -46,7 +50,7 @@ export default function EditHotel({ params }: { params: Promise<{ id: string }> 
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify({ name, description, price: parseFloat(price) }),
+      body: JSON.stringify({ name, description, price: parseFloat(price), address, image }),
     })
 
     if (response.ok) {
@@ -92,6 +96,24 @@ export default function EditHotel({ params }: { params: Promise<{ id: string }> 
                 required
                 min="0"
                 step="0.01"
+              />
+            </div>
+            <div>
+              <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address</label>
+              <Input
+                id="address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="image" className="block text-sm font-medium text-gray-700">Image URL</label>
+              <Input
+                id="image"
+                value={image}
+                onChange={(e) => setImage(e.target.value)}
+                placeholder="https://example.com/image.jpg"
               />
             </div>
             <Button type="submit">Update Hotel</Button>
