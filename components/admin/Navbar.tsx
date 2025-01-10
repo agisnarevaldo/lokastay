@@ -10,6 +10,7 @@ const navItems = [
   { href: '/admin/bookings', label: 'Bookings' },
 ]
 
+
 export function Navbar() {
   const pathname = usePathname()
 

@@ -27,6 +27,7 @@ export default function Login() {
 
       if (response.ok) {
         console.log('Login successful:', data)
+        router.push('/admin/dashboard')
         localStorage.setItem('token', data.token)
         if (data.isAdmin) {
           router.push('/admin/dashboard')

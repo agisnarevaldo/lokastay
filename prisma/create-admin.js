@@ -4,8 +4,8 @@ const bcrypt = require('bcryptjs')
 const prisma = new PrismaClient()
 
 async function main() {
-    const adminEmail = 'admin@lokastay.com'
-    const adminPassword = 'adminpassword123' // You should use a strong password in production
+    const adminEmail = 'admin@mail.com'
+    const adminPassword = 'admin123' // You should use a strong password in production
 
     const hashedPassword = await bcrypt.hash(adminPassword, 10)
 

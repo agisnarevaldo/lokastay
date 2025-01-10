@@ -30,6 +30,8 @@ model Hotel {
   name        String
   description String
   price       Float    @default(0.0)
+  address     String   @default("")
+  image       String   @default("https://picsum.photos/200")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   bookings    Booking[]
